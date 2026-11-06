@@ -73,15 +73,24 @@ npm start
 
 ---
 
-## Installation & Desktop Integration Scripts
+## Installation & Packaging
 
-The repository includes convenient helper scripts:
+### Method 1: Install Debian (.deb) Package (Recommended)
+You can build and install the native Debian package:
+```bash
+# Build the .deb installer (outputs to dist/whatsapp-linux_1.0.0_amd64.deb)
+npm run build:deb
 
-- **Install Desktop Integration**:
-  ```bash
-  bash scripts/install-desktop.sh
-  ```
-  *(Installs `.desktop` launcher to `~/.local/share/applications/`, icons to `~/.local/share/icons/hicolor/`, and binary to `~/.local/bin/whatsapp-linux`)*
+# Install system-wide
+sudo dpkg -i dist/whatsapp-linux_1.0.0_amd64.deb
+```
+Or right-click `dist/whatsapp-linux_1.0.0_amd64.deb` in your file manager and choose **Open With Software Install**.
+
+### Method 2: Local User Desktop Integration (Without Sudo)
+```bash
+bash scripts/install-desktop.sh
+```
+*(Installs `.desktop` launcher to `~/.local/share/applications/`, icons to `~/.local/share/icons/hicolor/`, and binary to `~/.local/bin/whatsapp-linux`)*
 
 - **Uninstall Desktop Integration**:
   ```bash

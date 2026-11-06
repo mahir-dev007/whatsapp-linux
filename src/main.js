@@ -230,12 +230,17 @@ function createMainWindow() {
 
   const startHidden = process.argv.includes('--minimized') || process.argv.includes('--hidden');
 
-  mainWindow.once('ready-to-show', () => {
-    if (!startHidden) {
+  const showWindow = () => {
+    if (!startHidden && mainWindow && !mainWindow.isDestroyed() && !mainWindow.isVisible()) {
       mainWindow.show();
       mainWindow.focus();
     }
-  });
+  };
+
+  mainWindow.once('ready-to-show', showWindow);
+  
+  // Guaranteed visibility fallback in case network delays ready-to-show
+  setTimeout(showWindow, 1200);
 
   // Right-click context menu (Cut, Copy, Paste, Link options, Image options)
   mainWindow.webContents.on('context-menu', (event, params) => {

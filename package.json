@@ -5,6 +5,7 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron --ozone-platform=x11 --disable-features=Vulkan .",
+    "build:deb": "bash scripts/build-deb.sh",
     "install-app": "bash scripts/install-desktop.sh",
     "uninstall-app": "bash scripts/uninstall-desktop.sh"
   },

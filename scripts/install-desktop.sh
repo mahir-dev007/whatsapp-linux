@@ -44,11 +44,10 @@ export PATH="\$HOME/.local/bin:\$PATH"
 export FONTCONFIG_PATH="\${FONTCONFIG_PATH:-/etc/fonts}"
 
 APP_DIR="$APP_DIR"
-ELECTRON_BIN="\$APP_DIR/node_modules/.bin/electron"
+ELECTRON_BIN="\$APP_DIR/node_modules/electron/dist/electron"
 
 if [ ! -x "\$ELECTRON_BIN" ]; then
-  echo "Electron binary not found at \$ELECTRON_BIN. Running npm install..."
-  cd "\$APP_DIR" && npm install
+  ELECTRON_BIN="\$APP_DIR/node_modules/.bin/electron"
 fi
 
 exec "\$ELECTRON_BIN" --ozone-platform=x11 --disable-features=Vulkan "\$APP_DIR" "\$@"
@@ -63,12 +62,13 @@ cat > "$DESKTOP_FILE" << EOF
 Name=WhatsApp
 GenericName=WhatsApp Desktop Client
 Comment=WhatsApp desktop client for Linux with voice and video calling
-Exec=$LAUNCHER_PATH %u
+Exec=$LAUNCHER_PATH %U
 Icon=whatsapp-linux
+Path=$APP_DIR
 Terminal=false
 Type=Application
 StartupNotify=true
-StartupWMClass=whatsapp
+StartupWMClass=whatsapp-linux
 Categories=Network;InstantMessaging;Chat;Telephony;VideoConference;AudioVideo;
 MimeType=x-scheme-handler/whatsapp;
 Keywords=WhatsApp;Chat;Message;Call;Voice;Video;Telephony;WebRTC;
