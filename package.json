@@ -1,0 +1,24 @@
+{
+  "name": "whatsapp-linux",
+  "version": "1.0.0",
+  "description": "Native WhatsApp desktop client for Linux with voice and video calling support",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron --ozone-platform=x11 --disable-features=Vulkan .",
+    "install-app": "bash scripts/install-desktop.sh",
+    "uninstall-app": "bash scripts/uninstall-desktop.sh"
+  },
+  "keywords": [
+    "whatsapp",
+    "linux",
+    "desktop",
+    "calling",
+    "webrtc",
+    "electron"
+  ],
+  "author": "Mahir",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^34.2.0"
+  }
+}
