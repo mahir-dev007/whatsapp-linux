@@ -65,7 +65,7 @@ cat > "$BUILD_DIR/usr/bin/whatsapp-linux" << 'EOF'
 unset ELECTRON_RUN_AS_NODE
 export FONTCONFIG_PATH="${FONTCONFIG_PATH:-/etc/fonts}"
 
-exec /opt/whatsapp-linux/whatsapp-linux --ozone-platform=x11 --disable-features=Vulkan "$@"
+exec /opt/whatsapp-linux/whatsapp-linux --no-sandbox --ozone-platform=x11 --disable-features=Vulkan "$@"
 EOF
 chmod +x "$BUILD_DIR/usr/bin/whatsapp-linux"
 

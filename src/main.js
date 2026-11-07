@@ -11,7 +11,7 @@
  * - Custom shortcuts & external link handling
  */
 
-const { app, BrowserWindow, Tray, Menu, ipcMain, shell, session, Notification, nativeImage, desktopCapturer } = require('electron');
+const { app, BrowserWindow, Tray, Menu, ipcMain, shell, session, Notification, nativeImage, desktopCapturer, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 

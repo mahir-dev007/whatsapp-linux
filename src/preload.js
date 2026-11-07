@@ -171,12 +171,46 @@ ipcRenderer.on('action-search-chat', () => {
   }
 });
 
-ipcRenderer.on('action-toggle-theme', (event, theme) => {
-  // Set theme class on body if supported
-  if (theme === 'dark') {
-    document.body.classList.add('dark');
-  } else if (theme === 'light') {
-    document.body.classList.remove('dark');
+// Device diagnostics helper for voice & video calling
+ipcRenderer.on('action-check-devices', async () => {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const audioInputs = devices.filter(d => d.kind === 'audioinput');
+    const videoInputs = devices.filter(d => d.kind === 'videoinput');
+    const audioOutputs = devices.filter(d => d.kind === 'audiooutput');
+
+    let report = 'Calling Devices Detected:\n\n';
+    
+    report += '🎤 Microphones:\n';
+    if (audioInputs.length > 0) {
+      audioInputs.forEach((d, idx) => {
+        report += `  ${idx + 1}. ${d.label || 'Default Microphone'} (${d.deviceId.slice(0, 8)}...)\n`;
+      });
+    } else {
+      report += '  None detected (check microphone connection)\n';
+    }
+
+    report += '\n📷 Webcams:\n';
+    if (videoInputs.length > 0) {
+      videoInputs.forEach((d, idx) => {
+        report += `  ${idx + 1}. ${d.label || 'Default Webcam'} (${d.deviceId.slice(0, 8)}...)\n`;
+      });
+    } else {
+      report += '  None detected (check camera connection)\n';
+    }
+
+    report += '\n🔊 Audio Output (Speakers):\n';
+    if (audioOutputs.length > 0) {
+      audioOutputs.forEach((d, idx) => {
+        report += `  ${idx + 1}. ${d.label || 'Default Output'}\n`;
+      });
+    } else {
+      report += '  System default\n';
+    }
+
+    ipcRenderer.send('devices-report', report);
+  } catch (err) {
+    ipcRenderer.send('devices-report', 'Error detecting media devices: ' + err.message);
   }
 });
 

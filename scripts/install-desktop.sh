@@ -50,7 +50,7 @@ if [ ! -x "\$ELECTRON_BIN" ]; then
   ELECTRON_BIN="\$APP_DIR/node_modules/.bin/electron"
 fi
 
-exec "\$ELECTRON_BIN" --ozone-platform=x11 --disable-features=Vulkan "\$APP_DIR" "\$@"
+exec "\$ELECTRON_BIN" --no-sandbox --ozone-platform=x11 --disable-features=Vulkan "\$APP_DIR" "\$@"
 EOF
 chmod +x "$LAUNCHER_PATH"
 
