@@ -51,6 +51,98 @@ const TRAY_ICON_UNREAD = path.join(ASSETS_DIR, 'tray-icon-unread.png');
 // Window state storage
 const CONFIG_FILE = path.join(userDataDir, 'window-state.json');
 const AUTOSTART_FILE = path.join(app.getPath('home'), '.config', 'autostart', 'whatsapp-linux.desktop');
+const SETTINGS_FILE = path.join(userDataDir, 'app-settings.json');
+
+// Persistent settings
+let appSettings = loadSettings();
+
+function loadSettings() {
+  const defaultSettings = {
+    privacyMode: false,
+    oledMode: false,
+    compactMode: false,
+    alwaysOnTop: false,
+    isMuted: false
+  };
+  try {
+    if (fs.existsSync(SETTINGS_FILE)) {
+      return Object.assign(defaultSettings, JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8')));
+    }
+  } catch (e) {
+    console.error('Error loading settings:', e);
+  }
+  return defaultSettings;
+}
+
+function saveSettings() {
+  try {
+    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(appSettings, null, 2), 'utf8');
+  } catch (e) {
+    console.error('Error saving settings:', e);
+  }
+}
+
+function togglePrivacyMode() {
+  appSettings.privacyMode = !appSettings.privacyMode;
+  saveSettings();
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('set-privacy-mode', appSettings.privacyMode);
+  }
+  updateTrayMenu();
+}
+
+function toggleOledMode() {
+  appSettings.oledMode = !appSettings.oledMode;
+  saveSettings();
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('set-oled-mode', appSettings.oledMode);
+  }
+  updateTrayMenu();
+}
+
+function toggleCompactMode() {
+  appSettings.compactMode = !appSettings.compactMode;
+  saveSettings();
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('set-compact-mode', appSettings.compactMode);
+  }
+  updateTrayMenu();
+}
+
+function toggleAlwaysOnTop() {
+  appSettings.alwaysOnTop = !appSettings.alwaysOnTop;
+  saveSettings();
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.setAlwaysOnTop(appSettings.alwaysOnTop);
+  }
+  updateTrayMenu();
+}
+
+function showShortcutsDialog() {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  dialog.showMessageBox(mainWindow, {
+    type: 'info',
+    title: 'Keyboard Shortcuts Guide',
+    message: 'WhatsApp Linux Desktop Shortcuts',
+    detail: [
+      '• Ctrl + N : Start a new chat',
+      '• Ctrl + F : Search chats & contacts',
+      '• Ctrl + Shift + P : Toggle Privacy Screen (blur messages until hovered)',
+      '• Ctrl + Shift + D : Toggle OLED Pure Black Dark Theme',
+      '• Ctrl + Shift + T : Toggle Always On Top (floating window for calls)',
+      '• Ctrl + Shift + C : Toggle Compact Chat List (fits more chats)',
+      '• Ctrl + R / F5 : Reload application',
+      '• Ctrl + Shift + R : Hard reload (clears web cache)',
+      '• Ctrl + = / + : Zoom In',
+      '• Ctrl + - : Zoom Out',
+      '• Ctrl + 0 : Reset Zoom to 100%',
+      '• Ctrl + W : Minimize to System Tray',
+      '• Ctrl + Q : Quit application completely',
+      '• Ctrl + / : Open this shortcuts guide'
+    ].join('\n'),
+    buttons: ['OK']
+  });
+}
 
 function isAutostartEnabled() {
   return fs.existsSync(AUTOSTART_FILE);
@@ -205,6 +297,7 @@ function createMainWindow() {
     minHeight: 500,
     title: 'WhatsApp',
     icon: APP_ICON_PNG,
+    alwaysOnTop: appSettings.alwaysOnTop,
     autoHideMenuBar: true,
     show: false, // Show once ready-to-show
     webPreferences: {
@@ -332,35 +425,54 @@ function createMainWindow() {
   // Handle zoom and custom keyboard shortcuts
   mainWindow.webContents.on('before-input-event', (event, input) => {
     if (input.control && !input.alt && !input.meta) {
-      if (input.key === '=' || input.key === '+') {
-        const currentZoom = mainWindow.webContents.getZoomFactor();
-        mainWindow.webContents.setZoomFactor(Math.min(currentZoom + 0.1, 2.0));
-        event.preventDefault();
-      } else if (input.key === '-') {
-        const currentZoom = mainWindow.webContents.getZoomFactor();
-        mainWindow.webContents.setZoomFactor(Math.max(currentZoom - 0.1, 0.6));
-        event.preventDefault();
-      } else if (input.key === '0') {
-        mainWindow.webContents.setZoomFactor(1.0);
-        event.preventDefault();
-      } else if (input.key.toLowerCase() === 'r' && !input.shift) {
-        mainWindow.reload();
-        event.preventDefault();
-      } else if (input.key.toLowerCase() === 'r' && input.shift) {
-        mainWindow.webContents.reloadIgnoringCache();
-        event.preventDefault();
-      } else if (input.key.toLowerCase() === 'n') {
-        mainWindow.webContents.send('action-new-chat');
-        event.preventDefault();
-      } else if (input.key.toLowerCase() === 'f') {
-        mainWindow.webContents.send('action-search-chat');
-        event.preventDefault();
-      } else if (input.key.toLowerCase() === 'w') {
-        mainWindow.hide();
-        event.preventDefault();
-      } else if (input.key.toLowerCase() === 'q') {
-        quitApplication();
-        event.preventDefault();
+      if (input.shift) {
+        if (input.key.toLowerCase() === 'p') {
+          togglePrivacyMode();
+          event.preventDefault();
+        } else if (input.key.toLowerCase() === 'd') {
+          toggleOledMode();
+          event.preventDefault();
+        } else if (input.key.toLowerCase() === 't') {
+          toggleAlwaysOnTop();
+          event.preventDefault();
+        } else if (input.key.toLowerCase() === 'c') {
+          toggleCompactMode();
+          event.preventDefault();
+        } else if (input.key.toLowerCase() === 'r') {
+          mainWindow.webContents.reloadIgnoringCache();
+          event.preventDefault();
+        }
+      } else {
+        if (input.key === '/' || input.key === '?') {
+          showShortcutsDialog();
+          event.preventDefault();
+        } else if (input.key === '=' || input.key === '+') {
+          const currentZoom = mainWindow.webContents.getZoomFactor();
+          mainWindow.webContents.setZoomFactor(Math.min(currentZoom + 0.1, 2.0));
+          event.preventDefault();
+        } else if (input.key === '-') {
+          const currentZoom = mainWindow.webContents.getZoomFactor();
+          mainWindow.webContents.setZoomFactor(Math.max(currentZoom - 0.1, 0.6));
+          event.preventDefault();
+        } else if (input.key === '0') {
+          mainWindow.webContents.setZoomFactor(1.0);
+          event.preventDefault();
+        } else if (input.key.toLowerCase() === 'r') {
+          mainWindow.reload();
+          event.preventDefault();
+        } else if (input.key.toLowerCase() === 'n') {
+          mainWindow.webContents.send('action-new-chat');
+          event.preventDefault();
+        } else if (input.key.toLowerCase() === 'f') {
+          mainWindow.webContents.send('action-search-chat');
+          event.preventDefault();
+        } else if (input.key.toLowerCase() === 'w') {
+          mainWindow.hide();
+          event.preventDefault();
+        } else if (input.key.toLowerCase() === 'q') {
+          quitApplication();
+          event.preventDefault();
+        }
       }
     }
   });
@@ -412,6 +524,30 @@ function updateTrayMenu() {
       }
     },
     {
+      label: 'Privacy Mode (Ctrl+Shift+P)',
+      type: 'checkbox',
+      checked: appSettings.privacyMode,
+      click: () => togglePrivacyMode()
+    },
+    {
+      label: 'OLED Pure Black Theme (Ctrl+Shift+D)',
+      type: 'checkbox',
+      checked: appSettings.oledMode,
+      click: () => toggleOledMode()
+    },
+    {
+      label: 'Compact Chat List (Ctrl+Shift+C)',
+      type: 'checkbox',
+      checked: appSettings.compactMode,
+      click: () => toggleCompactMode()
+    },
+    {
+      label: 'Always On Top (Ctrl+Shift+T)',
+      type: 'checkbox',
+      checked: appSettings.alwaysOnTop,
+      click: () => toggleAlwaysOnTop()
+    },
+    {
       label: isMuted ? 'Unmute Notifications' : 'Mute Notifications',
       type: 'checkbox',
       checked: isMuted,
@@ -420,29 +556,34 @@ function updateTrayMenu() {
         updateTrayMenu();
       }
     },
+    { type: 'separator' },
+    {
+      label: 'Check Calling Devices (Mic/Cam)...',
+      click: () => {
+        if (!mainWindow.isVisible()) mainWindow.show();
+        mainWindow.focus();
+        mainWindow.webContents.send('action-check-devices');
+      }
+    },
+    {
+      label: 'Clear Cache & Reload',
+      click: () => {
+        session.defaultSession.clearCache().then(() => {
+          if (mainWindow) mainWindow.reload();
+        });
+      }
+    },
+    {
+      label: 'Keyboard Shortcuts Guide (Ctrl+/)',
+      click: () => showShortcutsDialog()
+    },
+    { type: 'separator' },
     {
       label: 'Start at System Login',
       type: 'checkbox',
       checked: isAutostartEnabled(),
       click: (menuItem) => {
         setAutostart(menuItem.checked);
-      }
-    },
-    { type: 'separator' },
-    {
-      label: 'Reload (Ctrl+R)',
-      click: () => {
-        if (mainWindow) mainWindow.reload();
-      }
-    },
-    {
-      label: 'Toggle Dark Theme',
-      click: () => {
-        if (mainWindow) {
-          mainWindow.webContents.executeJavaScript(`
-            document.body.classList.toggle('dark');
-          `);
-        }
       }
     },
     { type: 'separator' },
@@ -537,6 +678,25 @@ ipcMain.on('incoming-call-alert', () => {
       callNotif.show();
     }
   }
+});
+
+ipcMain.on('preload-ready', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('set-privacy-mode', appSettings.privacyMode);
+    mainWindow.webContents.send('set-oled-mode', appSettings.oledMode);
+    mainWindow.webContents.send('set-compact-mode', appSettings.compactMode);
+  }
+});
+
+ipcMain.on('devices-report', (event, report) => {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  dialog.showMessageBox(mainWindow, {
+    type: 'info',
+    title: 'Calling Devices (Mic & Camera)',
+    message: 'WhatsApp Calling Hardware Status',
+    detail: report,
+    buttons: ['OK']
+  });
 });
 
 // App Lifecycle

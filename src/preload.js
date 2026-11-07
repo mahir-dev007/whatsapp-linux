@@ -113,7 +113,7 @@ if (OriginalNotification) {
   }
 }
 
-// Inject custom CSS styling improvements
+// Inject custom CSS styling improvements, Privacy Mode, OLED Black, and Compact styling
 function injectCustomStyles() {
   const styleEl = document.createElement('style');
   styleEl.id = 'whatsapp-linux-custom-styles';
@@ -133,6 +133,67 @@ function injectCustomStyles() {
     ::-webkit-scrollbar-track {
       background: transparent !important;
     }
+
+    /* Privacy Mode: Blurs messages, names, and images until hovered */
+    body.wa-privacy-mode div[role="row"] span[title],
+    body.wa-privacy-mode .copyable-text,
+    body.wa-privacy-mode div[data-testid="msg-container"] span,
+    body.wa-privacy-mode div[data-testid="msg-container"] p,
+    body.wa-privacy-mode [data-pre-plain-text],
+    body.wa-privacy-mode img[src*="blob:"],
+    body.wa-privacy-mode img[src*="data:image"],
+    body.wa-privacy-mode [data-testid="conversation-panel-messages"] img {
+      filter: blur(8px) !important;
+      transition: filter 0.18s ease-in-out !important;
+    }
+    body.wa-privacy-mode div[role="row"]:hover span[title],
+    body.wa-privacy-mode .copyable-text:hover,
+    body.wa-privacy-mode div[data-testid="msg-container"]:hover span,
+    body.wa-privacy-mode div[data-testid="msg-container"]:hover p,
+    body.wa-privacy-mode [data-pre-plain-text]:hover,
+    body.wa-privacy-mode img[src*="blob:"]:hover,
+    body.wa-privacy-mode img[src*="data:image"]:hover,
+    body.wa-privacy-mode [data-testid="conversation-panel-messages"]:hover img {
+      filter: none !important;
+    }
+
+    /* OLED Pure Black Dark Theme */
+    body.wa-oled-black,
+    body.wa-oled-black #app,
+    body.wa-oled-black [data-testid="chat-list"],
+    body.wa-oled-black [data-testid="conversation-panel-wrapper"],
+    body.wa-oled-black [data-testid="intro-background"],
+    body.wa-oled-black [data-asset-intro-image-light],
+    body.wa-oled-black [data-asset-intro-image-dark] {
+      background-color: #000000 !important;
+    }
+    body.wa-oled-black header {
+      background-color: #0a0a0a !important;
+      border-bottom: 1px solid #1a1a1a !important;
+    }
+    body.wa-oled-black div[data-testid="conversation-panel-messages"] {
+      background-color: #000000 !important;
+      background-image: none !important;
+    }
+    body.wa-oled-black div[data-testid="msg-container"] {
+      background-color: #0d0d0d !important;
+      border: 1px solid #1c1c1c !important;
+    }
+    body.wa-oled-black [data-testid="message-in"] > div {
+      background-color: #121212 !important;
+    }
+    body.wa-oled-black [data-testid="message-out"] > div {
+      background-color: #004d40 !important;
+    }
+
+    /* Compact Chat List Mode */
+    body.wa-compact-mode div[data-testid="cell-frame-container"] {
+      height: 52px !important;
+    }
+    body.wa-compact-mode div[role="row"] {
+      padding-top: 2px !important;
+      padding-bottom: 2px !important;
+    }
   `;
   document.head.appendChild(styleEl);
 }
@@ -151,6 +212,9 @@ window.addEventListener('DOMContentLoaded', () => {
   // Periodic poll for unread badge & incoming call notifications
   setInterval(updateUnreadCount, 1500);
   setInterval(checkForIncomingCalls, 1000);
+
+  // Request saved settings from main process
+  ipcRenderer.send('preload-ready');
 });
 
 // IPC listener for shortcut actions from main process
@@ -213,4 +277,31 @@ ipcRenderer.on('action-check-devices', async () => {
     ipcRenderer.send('devices-report', 'Error detecting media devices: ' + err.message);
   }
 });
+
+// Quality of life feature handlers
+ipcRenderer.on('set-privacy-mode', (event, enabled) => {
+  if (enabled) {
+    document.body.classList.add('wa-privacy-mode');
+  } else {
+    document.body.classList.remove('wa-privacy-mode');
+  }
+});
+
+ipcRenderer.on('set-oled-mode', (event, enabled) => {
+  if (enabled) {
+    document.body.classList.add('dark');
+    document.body.classList.add('wa-oled-black');
+  } else {
+    document.body.classList.remove('wa-oled-black');
+  }
+});
+
+ipcRenderer.on('set-compact-mode', (event, enabled) => {
+  if (enabled) {
+    document.body.classList.add('wa-compact-mode');
+  } else {
+    document.body.classList.remove('wa-compact-mode');
+  }
+});
+
 

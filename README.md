@@ -52,13 +52,37 @@ npm start
 | :--- | :--- |
 | `Ctrl + N` | Open New Chat dialog |
 | `Ctrl + F` | Search chats and contacts |
+| `Ctrl + Shift + P` | **Privacy Screen**: Blurs messages, names & media until hovered |
+| `Ctrl + Shift + D` | **OLED Pure Black**: Ultra-dark theme for battery saving |
+| `Ctrl + Shift + T` | **Always On Top**: Float window for calls & multitasking |
+| `Ctrl + Shift + C` | **Compact Mode**: Fits more conversations on screen |
 | `Ctrl + R` / `F5` | Reload WhatsApp |
-| `Ctrl + Shift + R` | Hard reload (clears temporary web cache) |
+| `Ctrl + Shift + R` | Hard reload (clears web cache) |
 | `Ctrl + =` / `Ctrl + +` | Zoom In |
 | `Ctrl + -` | Zoom Out |
 | `Ctrl + 0` | Reset Zoom to 100% |
 | `Ctrl + W` | Hide to System Tray |
 | `Ctrl + Q` | Quit WhatsApp completely |
+| `Ctrl + /` | Open Keyboard Shortcuts Guide |
+
+---
+
+## Safe & Useful Built-In Features
+
+- **Privacy Screen (`Ctrl + Shift + P`)**:
+  Protects your privacy in public or shared spaces by blurring message bubbles, contact names, and images until you hover your mouse over them.
+- **True OLED Pure Black Theme (`Ctrl + Shift + D`)**:
+  Custom true `#000000` dark styling that saves laptop battery life and looks great on modern displays.
+- **Always On Top (`Ctrl + Shift + T`)**:
+  Keep WhatsApp pinned above other windows while taking notes, working, or participating in video calls.
+- **Compact Chat List (`Ctrl + Shift + C`)**:
+  Reduces sidebar padding to display more conversations simultaneously.
+- **Calling Hardware Diagnostics**:
+  Select *Check Calling Devices (Mic/Cam)...* from the system tray menu to inspect all connected microphones, webcams, and speakers.
+- **Cache Cleaner**:
+  Select *Clear Cache & Reload* to resolve transient web glitches without losing your login session.
+- **Auto-Start on Login**:
+  Toggle *Start at System Login* directly from the tray menu.
 
 ---
 
