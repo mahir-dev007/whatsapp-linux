@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 DIST_DIR="$APP_DIR/dist"
 BUILD_DIR="$DIST_DIR/deb-build"
-DEB_NAME="whatsapp-linux_1.0.0_amd64.deb"
+DEB_NAME="whatsapp-linux_1.1.0_amd64.deb"
 OUTPUT_DEB="$DIST_DIR/$DEB_NAME"
 
 echo "=========================================="
@@ -53,7 +53,7 @@ cp -r "$APP_DIR/assets" "$APP_DEST/"
 cat > "$APP_DEST/package.json" << 'EOF'
 {
   "name": "whatsapp-linux",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Native WhatsApp desktop client for Linux with voice and video calling support",
   "main": "src/main.js"
 }
@@ -109,7 +109,7 @@ INSTALLED_SIZE=$(du -sk "$BUILD_DIR" | cut -f1)
 # 10. Generate DEBIAN/control file
 cat > "$BUILD_DIR/DEBIAN/control" << EOF
 Package: whatsapp-linux
-Version: 1.0.0
+Version: 1.1.0
 Section: net
 Priority: optional
 Architecture: amd64
